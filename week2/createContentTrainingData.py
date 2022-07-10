@@ -6,7 +6,9 @@ from pathlib import Path
 
 def transform_name(product_name):
     # IMPLEMENT
-    return product_name
+    from nltk.stem import SnowballStemmer
+    stemmer = SnowballStemmer("english")
+    return stemmer.stem(product_name)
 
 # Directory for product data
 directory = r'/workspace/datasets/product_data/products/'
