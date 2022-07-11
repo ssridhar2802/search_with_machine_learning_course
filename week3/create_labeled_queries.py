@@ -49,9 +49,23 @@ df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+df['query'] = df['query'].str.lower()
+df['query'] = df['query'].str.replace('[^a-zA-Z]', ' ')
+df['query'] = df['query'].replace(r'\s+', ' ', regex=True)
+df['query'] = df['query'].apply(lambda x: stemmer.stem(x))
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+parents_dict = parents_df.set_index('category')['parent'].to_dict()
+while True:
+    less_frequent_categories = df.groupby('category').filter(lambda x: len(x) < min_queries).category.value_counts().keys()
+    print(len(less_frequent_categories))
+    print(less_frequent_categories)
+    if len(less_frequent_categories) == 0:
+        break
+    replacement_dict = {k: v for k, v in parents_dict.items() if k in less_frequent_categories}
+    df["category"].replace(replacement_dict, inplace=True)
 
+print(f'total categories: {len(df.category.value_counts())}')
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']
 
